@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eye Acuity Test Grid</title>
+
+    <script src="prog.js"></script>
+    <style>
+        body{
+            height: 100vh;
+        }
+
+        .centered {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+        #grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 256px);
+            grid-template-rows: repeat(3, 256px);
+            gap: 15px;
+            background-color: white;
+            padding: 15px;
+        }
+        .grid-item {
+            background-color: #fff;
+            background-image: url("gridBlackWhite4x4.png");
+            image-rendering: pixelated;
+        }
+
+        .random-square {
+            position: relative;
+            background-color: #000;
+            /* background-image: url(gridGray.png);*/
+        }
+
+        .info{
+        }
+
+    </style>
+</head>
+<body onload="init()">
+    <div style="font-size: 3em;">
+        <div>
+            Display <span id="screenCharacteristic">...</span>
+        </div>
+
+        <div>
+            Correct <span id="correctAnswer">...</span> / <span id="rounds">...</span> 
+        </div>
+    </div>
+
+    <div class="centered">
+        <div id="grid-container">
+            <div class="grid-item"></div>
+            <div class="grid-item"></div>
+            <div class="grid-item"></div>
+            <div class="grid-item"></div>
+            <div class="grid-item"></div>
+            <div class="grid-item"></div>
+            <div class="grid-item"></div>
+            <div class="grid-item"></div>
+            <div class="grid-item"></div>
+        </div>
+    </div>
+</body>
+</html>
