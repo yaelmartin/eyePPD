@@ -3,6 +3,8 @@ var defaultRoundsToPassToNextDifficulty = 5;
 var requiredRatioToPassToNextDifficulty = 0;
 var defaultSizeSquareToFindPixels = 50;
 
+var useNumberPad = false;
+
 
 var arrayTests;
 var currentTestResultStruct;
@@ -96,7 +98,20 @@ function init() {
         // Check if the key is between 1 and 9
         if (key >= '1' && key <= '9') {
             //console.log("valid 1-9 key");
-            userAnswer(parseInt(key));
+
+            choice = parseInt(key)
+            useNumberPad = true;
+            if(useNumberPad){
+                // Map numpad keys to grid positions
+                const numpadMap = {
+                    '7': 1, '8': 2, '9': 3,
+                    '4': 4, '5': 5, '6': 6,
+                    '1': 7, '2': 8, '3': 9
+                };
+                choice = numpadMap[key];
+            }
+
+            userAnswer(choice);
         }
     });
 
