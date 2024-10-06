@@ -6,9 +6,13 @@
     <title>Eye Acuity Test Grid</title>
 
     <script src="prog.js"></script>
+    <script src="cookie.js"></script>
+    <script src="structs.js"></script>
+
     <style>
         body{
             height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         .centered {
@@ -47,12 +51,14 @@
 <body onload="init()">
     <div style="font-size: 3em;">
         <div>
-            Display <span id="screenCharacteristic">...</span>
+            Display <span id="screenCharacteristics">...</span>
         </div>
 
         <div>
-            Correct <span id="correctAnswer">...</span> / <span id="rounds">...</span> 
+            Correct <span id="correctAnswers">...</span> / <span id="rounds">...</span> 
         </div>
+
+        <button onclick="clearCookie('distance')">Clear cookie</button>
     </div>
 
     <div class="centered">

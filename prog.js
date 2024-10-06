@@ -1,3 +1,15 @@
+// Rounds settings
+var defaultRoundsToPassToNextDifficulty = 5;
+var requiredRatioToPassToNextDifficulty = 0;
+var defaultSizeSquareToFindPixels = 50;
+
+
+var arrayTests;
+var currentTestResultStruct;
+var sizeSquareToFindPixels;
+
+var testingPPD;
+
 var gridContainer;
 var gridItems;
 var gridSquareSize;
@@ -7,15 +19,15 @@ var counterRounds;
 var correctSquare;
 var ready;
 
-var sizeRandomPixel;
+
 var sizeWindowWidth;
 var distanceView;
 
 // User interface output elements
-
-var textCounterCorrectAnswer;
+var textCounterCorrectAnswers;
 var textCounterRounds;
-var textScreenCharacteristic;
+var textScreenCharacteristics;
+
 
 // Function to create a new square div
 function createRandomSquare() {
@@ -28,12 +40,12 @@ function createRandomSquare() {
     const square = document.createElement('div');
     square.id = 'random-square';
     square.className = 'random-square';
-    square.style.width = `${sizeRandomPixel}px`;
-    square.style.height = `${sizeRandomPixel}px`;
+    square.style.width = `${sizeSquareToFindPixels}px`;
+    square.style.height = `${sizeSquareToFindPixels}px`;
 
     const safeBorderMargin = 16;
 
-    const maxMargin = gridSquareSize - sizeRandomPixel - 2 * safeBorderMargin;
+    const maxMargin = gridSquareSize - sizeSquareToFindPixels - 2 * safeBorderMargin;
     const randomMarginTop = Math.floor(Math.random() * maxMargin) + safeBorderMargin;
     const randomMarginLeft = Math.floor(Math.random() * maxMargin) + safeBorderMargin;
 
@@ -67,56 +79,117 @@ function init() {
     gridSquareSize = gridItems[0].getBoundingClientRect().width;
 
 
-    textCounterCorrectAnswer = document.getElementById('correctAnswer');
+    textCounterCorrectAnswers = document.getElementById('correctAnswers');
     textCounterRounds = document.getElementById('rounds');
-    textScreenCharacteristic = document.getElementById('screenCharacteristic');  
+    textScreenCharacteristics = document.getElementById('screenCharacteristics');  
 
-    
+
+
 
 
     // Function to handle key presses
     document.addEventListener('keydown', function(event) {
-        console.log("event entered");
+        //console.log("event entered");
 
         var key = event.key;
         
         // Check if the key is between 1 and 9
         if (key >= '1' && key <= '9') {
-            console.log("valid 1-9 key");
+            //console.log("valid 1-9 key");
             userAnswer(parseInt(key));
         }
     });
 
 
+    // Reset every values
     counterCorrectAnswer = 0;
     counterRounds = 0;
     ready = false;
 
 
-    // TODO: Needs to be setup by the user instead
 
-    sizeRandomPixel = 25;
-    lengthWindowWidth = 32.7; // Size in cm
+    checkCookies(); // Ask the user his window's with and view distance
+    /* // Manual override
+    sizeWindowWidth = 32.7; // Size in cm
     distanceView = 400 // Distance in cm
+    */
 
-    let windowHorizontalFOV = calculateFieldOfView(distanceView,lengthWindowWidth);
+    sizeSquareToFindPixels = defaultSizeSquareToFindPixels;
 
-    let lenghtOfSquare = (lengthWindowWidth / screen.width) * sizeRandomPixel;
-    let testingPPD = 1 / calculateFieldOfView(distanceView,lenghtOfSquare)
+    updateTestingPPD();
+
+    // Tests difficulty and rounds setup
+    arrayTests = new Array();
+    currentTestResultStruct = new TestResult(testingPPD, 0, 0, sizeSquareToFindPixels);
+    arrayTests.push(currentTestResultStruct);
+
+    console.log('testingPPD is ' + testingPPD + ', sizeSquareToFindPixels is ' + sizeSquareToFindPixels + 'px');
+
+    newTestDifficulty();
+}
+
+function updateTestingPPD(){
+    let windowHorizontalFOV = calculateFieldOfView(distanceView,sizeWindowWidth);
+    let lenghtOfSquareCm = (sizeWindowWidth / screen.width) * sizeSquareToFindPixels;
+    testingPPD = 1 / calculateFieldOfView(distanceView,lenghtOfSquareCm)
 
     // rounding
     testingPPD = Math.round((testingPPD + Number.EPSILON) * 100) / 100;
+
     windowHorizontalFOV = Math.round((windowHorizontalFOV + Number.EPSILON) * 100) / 100;
 
     let stringInfo = "" + screen.width + ", Window horizontal FOV: " + windowHorizontalFOV + ", Testing PPD " + testingPPD;
-    textScreenCharacteristic.innerHTML = stringInfo;
-
-    newTest();
+    textScreenCharacteristics.innerHTML = stringInfo;
 }
+
+function newTestDifficulty(){
+    // Shorten the numbers of rounds for low testingPPD
+    if(testingPPD < 15){
+        roundsToPassToNextDifficulty = 2;
+    }else{
+        roundsToPassToNextDifficulty = defaultRoundsToPassToNextDifficulty;
+    }
+
+    // All rounds of the test are finished, trying to go to next difficulty
+    if(currentTestResultStruct.rounds >= roundsToPassToNextDifficulty){
+
+        // Verify the previous test was successful
+        if(currentTestResultStruct.ratio() > requiredRatioToPassToNextDifficulty){
+            
+            // Change the pixel
+            let newSize =  Math.round(sizeSquareToFindPixels * 0.7);
+            
+            if(newSize >= sizeSquareToFindPixels){
+                alert('Cant test further difficulty !')
+            }else{
+                // We continue to next
+                sizeSquareToFindPixels = newSize;
+                updateTestingPPD();
+
+                console.log('New test! testingPPD is ' + testingPPD + ', sizeSquareToFindPixels is ' + sizeSquareToFindPixels + 'px');
+    
+                currentTestResultStruct = new TestResult(testingPPD, 0, 0, sizeSquareToFindPixels);
+                arrayTests.push(currentTestResultStruct);
+
+                newRound();
+
+            }
+        }else{
+            alert('Score too low to go to the next test.');
+        }
+
+    }else{
+        newRound();
+    }
+
+
+
+}
+
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-const newTest = async () => {
+const newRound = async () => {
 
     gridContainer.style.visibility = "hidden" ;
 
@@ -126,7 +199,7 @@ const newTest = async () => {
         squareElement.remove();    
     }
 
-    await delay(1000);
+    await delay(100);
 
     createRandomSquare();
     console.log("correctSquare " + correctSquare);
@@ -136,22 +209,26 @@ const newTest = async () => {
 
 function userAnswer(intAnswer){
     if(ready){
-        console.log(intAnswer);
+        console.log("user's answer is " + intAnswer);
 
         ready = false;
         if(intAnswer == correctSquare){
             counterCorrectAnswer++;
+
+            currentTestResultStruct.correctAnswers ++;
         }
         counterRounds++;
+
+        currentTestResultStruct.rounds ++;
     
         updateUIanswer();
     
-        newTest();
+        newTestDifficulty();
     }
 }
 
 function updateUIanswer(){
-    textCounterCorrectAnswer.innerText = ""+counterCorrectAnswer;
+    textCounterCorrectAnswers.innerText = ""+counterCorrectAnswer;
     textCounterRounds.innerText = ""+counterRounds;
 }
 
