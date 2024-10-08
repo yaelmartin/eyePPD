@@ -1,78 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no"
+    />
     <title>Eye Acuity Test Grid</title>
+
+    <link rel="stylesheet" href="style.css" />
 
     <script src="prog.js"></script>
     <script src="cookie.js"></script>
     <script src="structs.js"></script>
+  </head>
 
-    <style>
-        body{
-            height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+  <script>
+    function toggleZoomScreen() {
+      document.body.style.zoom = 1 / window.devicePixelRatio;
+    }
+  </script>
 
-        .centered {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f0f0f0;
-        }
-        #grid-container {
-            display: grid;
-            grid-template-columns: repeat(3, 256px);
-            grid-template-rows: repeat(3, 256px);
-            gap: 15px;
-            background-color: white;
-            padding: 15px;
-        }
-        .grid-item {
-            background-color: #fff;
-            background-image: url("gridBlackWhite4x4.png");
-            image-rendering: pixelated;
-        }
+  <body
+    onload="toggleZoomScreen(); onPageLoaded()"
+    onresize="toggleZoomScreen();"
+    class="no-gap"
+    style="display: inline-flex"
+  >
+    <div class="container-fit centered">
+      <div id="info-panel" style="font-size: 17px">
+        <div class="row">
+          <div class="left-align">
+            Window width
 
-        .random-square {
-            position: relative;
-            background-color: #000;
-            /* background-image: url(gridGray.png);*/
-        }
+            <ul>
+              <span id="screenCharacteristics"></span>
+            </ul>
+          </div>
 
-        .info{
-        }
-
-    </style>
-</head>
-<body onload="init()">
-    <div style="font-size: 3em;">
-        <div>
-            Display <span id="screenCharacteristics">...</span>
+          <div class="right-align">
+            <div>Distance <span id="distance"></span></div>
+            <div>Square is <span id="testingPixel"></span></div>
+            <div>
+              Correct <span id="correctAnswers">0</span>/<span id="rounds"
+                >0</span
+              >
+            </div>
+          </div>
         </div>
 
         <div>
-            Correct <span id="correctAnswers">...</span> / <span id="rounds">...</span> 
+          Testing PPD <br /><span
+            id="testingPPD"
+            style="font-size: 60px; line-height: 1"
+          ></span>
         </div>
 
-        <button onclick="clearCookie('distance')">Clear cookie</button>
-    </div>
+        <div>
+          <button onclick="clearCookie('distance')">Clear saved width</button>
+          <button onclick="init();">Init</button>
+          <button onclick="initFullscreen();">Init Fullscreen</button>
+        </div>
+      </div>
 
-    <div class="centered">
+      <div class="no-gap">
         <div id="grid-container">
-            <div class="grid-item"></div>
-            <div class="grid-item"></div>
-            <div class="grid-item"></div>
-            <div class="grid-item"></div>
-            <div class="grid-item"></div>
-            <div class="grid-item"></div>
-            <div class="grid-item"></div>
-            <div class="grid-item"></div>
-            <div class="grid-item"></div>
+          <div class="grid-item"></div>
+          <div class="grid-item"></div>
+          <div class="grid-item"></div>
+          <div class="grid-item"></div>
+          <div class="grid-item"></div>
+          <div class="grid-item"></div>
+          <div class="grid-item"></div>
+          <div class="grid-item"></div>
+          <div class="grid-item"></div>
         </div>
+      </div>
     </div>
-</body>
+
+    <!--
+    -->
+  </body>
 </html>
