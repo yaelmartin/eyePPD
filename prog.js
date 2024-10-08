@@ -28,9 +28,11 @@ var viewportWidthTruePx;
 var viewportHeightTruePx;
 
 // User interface output elements
+var divInfoPanel;
 var textCounterCorrectAnswers;
 var textCounterRounds;
 var textScreenCharacteristics;
+var textTestingPixel;
 var textTestingPPD;
 
 
@@ -77,8 +79,7 @@ function calculateFieldOfView(distance, length) {
 }
 
 
-//
-function mapScreenGridInfoPanel(){
+function resizeTestGrid(){
     viewportHeightTruePx=window.innerHeight * window.devicePixelRatio;
     viewportWidthTruePx=window.innerWidth * window.devicePixelRatio;
     
@@ -87,10 +88,8 @@ function mapScreenGridInfoPanel(){
     
     if (viewportHeightTruePx > viewportWidthTruePx){
         truePixelsMax = viewportWidthTruePx;
-        console.log("height is higer, using witfdh");
     }else{
         truePixelsMax = viewportHeightTruePx;
-        console.log("height lower higer, using height");
     }
     truePixelsMax = Math.floor(truePixelsMax);
 
@@ -107,6 +106,48 @@ function mapScreenGridInfoPanel(){
     gridContainer.style.gridTemplateColumns = "repeat(3, " + gridItemSize +"px)";
     gridContainer.style.gap = ""+gridGap+"px";
     gridContainer.style.padding = ""+gridPadding+"px";
+}
+
+function resizeInfoPanel(){
+    let width = 300;
+    let height = 220;
+    let padding = 20;
+    
+    let infoPanelRatio = width/height;
+
+    divInfoPanel.style.width =""+width+"px";
+    divInfoPanel.style.height=""+height+"px";
+    divInfoPanel.style.padding=""+padding+"px";
+
+    let zoomScale;
+    if (viewportHeightTruePx > viewportWidthTruePx){
+        let remainingHeight = viewportHeightTruePx-viewportWidthTruePx;
+
+        let ratioSpaceLeft = viewportWidthTruePx/remainingHeight;
+        if(ratioSpaceLeft>infoPanelRatio){
+            zoomScale = (remainingHeight)/(padding*2+height);
+        }else{
+            zoomScale = (viewportWidthTruePx)/(padding*2+width);
+        }
+
+    }else{
+        let remainingWitdh = viewportWidthTruePx-viewportHeightTruePx;
+        zoomScale = (remainingWitdh)/(padding*2+width);
+
+        /*
+
+        let ratioSpaceLeft = viewportHeightTruePx/remainingWitdh;
+        if(ratioSpaceLeft>infoPanelRatio){
+
+        }else{
+            zoomScale = (viewportHeightTruePx)/(padding*2+height);
+        }*/
+    }
+
+    zoomScale = Math.floor((zoomScale + Number.EPSILON) * 100) / 100;
+
+    console.log("zoomScale",zoomScale);
+    divInfoPanel.style.zoom = zoomScale;
 }
 
 function addKeyPressEvent(){
@@ -148,25 +189,31 @@ function init(){
 }
 
 
+function onPageLoaded(){
+    // Retrieve all IDs
+    gridContainer = document.getElementById('grid-container'); 
+    gridItems = gridContainer.children;
+
+    divInfoPanel = document.getElementById('info-panel');
+    textCounterCorrectAnswers = document.getElementById('correctAnswers');
+    textCounterRounds = document.getElementById('rounds');
+    textScreenCharacteristics = document.getElementById('screenCharacteristics');
+    textTestingPixel = document.getElementById('testingPixel');
+    textTestingPPD = document.getElementById('testingPPD');  
+
+    addKeyPressEvent();
+
+    resizeTestGrid();
+    resizeInfoPanel();
+
+    gridContainer.style.visibility="visible";
+}
+
 function setup(){ 
     /* // Manual override
     sizeWindowWidthCm = 32.7;
     distanceViewCm = 400 
     */
-
-    // Retrieve all grid items
-    gridContainer = document.getElementById('grid-container'); 
-    gridItems = gridContainer.children;
-
-
-    textCounterCorrectAnswers = document.getElementById('correctAnswers');
-    textCounterRounds = document.getElementById('rounds');
-    textScreenCharacteristics = document.getElementById('screenCharacteristics');  
-    textTestingPPD = document.getElementById('testingPPD');  
-
-    mapScreenGridInfoPanel();
-
-    addKeyPressEvent();
 
     let windowHorizontalFOV = calculateFieldOfView(distanceViewCm,sizeWindowWidthCm);
     windowHorizontalFOV = Math.round((windowHorizontalFOV + Number.EPSILON) * 100) / 100;
@@ -179,7 +226,7 @@ function setup(){
     ready = false;
 
     // Size for first test
-    sizeSquareToFindPixels = gridItemSize /3;
+    sizeSquareToFindPixels = Math.round(gridItemSize /3);
 
     updateTestingPPD();
 
@@ -196,7 +243,8 @@ function updateTestingPPD(){
     let lenghtOfSquareCm = (sizeWindowWidthCm / viewportWidthTruePx) * sizeSquareToFindPixels;
     testingPPD = 1 / calculateFieldOfView(distanceViewCm,lenghtOfSquareCm)
 
-    textTestingPPD.innerHTML= Math.round((testingPPD + Number.EPSILON) * 100) / 100;
+    textTestingPPD.innerHTML = Math.round((testingPPD + Number.EPSILON) * 100) / 100;
+    textTestingPixel.innerHTML = ""+sizeSquareToFindPixels + " pixels"; 
 }
 
 function newTestDifficulty(){
