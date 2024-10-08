@@ -44,7 +44,7 @@ function checkCookies() {
         setCookie('windowWidth', value2, 365);
         alert('Values saved:\ndistance ' + value1 + 'cm\nwindow width ' + value2 + 'cm');
     } else {
-        alert('Values from cookie:\ndistance ' + value1 + 'cm\nwindow width ' + value2 + 'cm' );
+        //alert('Values from cookie:\ndistance ' + value1 + 'cm\nwindow width ' + value2 + 'cm' );
     }
 
     distanceViewCm = value1;

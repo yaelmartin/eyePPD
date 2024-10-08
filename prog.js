@@ -176,7 +176,11 @@ function addKeyPressEvent(){
 
 const initFullscreen = async () => {
     checkCookies(); // Ask the user his window's with and view distance, apply them to variables
-    document.documentElement.requestFullscreen(); 
+    await delay(100);
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      }
+
     await delay(1000); // Delay is required for elements to update before calling mapScreenGridInfoPanel()
     setup();
 }
@@ -219,7 +223,7 @@ function setup(){
 
     let windowHorizontalFOV = calculateFieldOfView(distanceViewCm,sizeWindowWidthCm);
     windowHorizontalFOV = Math.round((windowHorizontalFOV + Number.EPSILON) * 100) / 100;
-    let stringInfo = "<li>"+sizeWindowWidthCm +"cm</li><li>" + Math.round(viewportWidthTruePx) + " pixels</li><li>" + windowHorizontalFOV + "HFOV</li>";
+    let stringInfo = "<li>"+sizeWindowWidthCm +"cm</li><li>" + Math.round(viewportWidthTruePx) + " pixels</li><li>" + windowHorizontalFOV + " HFOV</li>";
     textScreenCharacteristics.innerHTML = stringInfo;
 
     textDistance.innerHTML=""+distanceViewCm+"cm";
