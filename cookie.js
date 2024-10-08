@@ -47,8 +47,8 @@ function checkCookies() {
         alert('Values from cookie:\ndistance ' + value1 + 'cm\nwindow width ' + value2 + 'cm' );
     }
 
-    distanceView = value1;
-    sizeWindowWidth = value2;
+    distanceViewCm = value1;
+    sizeWindowWidthCm = value2;
 }
 
 function valuesInvalid(distance,witdh){

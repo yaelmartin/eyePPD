@@ -1,9 +1,9 @@
 // Rounds settings
 var defaultRoundsToPassToNextDifficulty = 5;
 var requiredRatioToPassToNextDifficulty = 0;
-var defaultSizeSquareToFindPixels = 50;
+var safeMinimalTestSizePx = 2;
 
-var useNumberPad = false;
+var useNumberPad = true;
 
 
 var arrayTests;
@@ -14,7 +14,7 @@ var testingPPD;
 
 var gridContainer;
 var gridItems;
-var gridSquareSize;
+var gridItemSize;
 
 var counterCorrectAnswer;
 var counterRounds;
@@ -22,13 +22,16 @@ var correctSquare;
 var ready;
 
 
-var sizeWindowWidth;
-var distanceView;
+var sizeWindowWidthCm;
+var distanceViewCm;
+var viewportWidthTruePx;
+var viewportHeightTruePx;
 
 // User interface output elements
 var textCounterCorrectAnswers;
 var textCounterRounds;
 var textScreenCharacteristics;
+var textTestingPPD;
 
 
 // Function to create a new square div
@@ -45,9 +48,9 @@ function createRandomSquare() {
     square.style.width = `${sizeSquareToFindPixels}px`;
     square.style.height = `${sizeSquareToFindPixels}px`;
 
-    const safeBorderMargin = 16;
+    const safeBorderMargin = Math.round(gridItemSize * 0.2);
 
-    const maxMargin = gridSquareSize - sizeSquareToFindPixels - 2 * safeBorderMargin;
+    const maxMargin = gridItemSize - sizeSquareToFindPixels - 2 * safeBorderMargin;
     const randomMarginTop = Math.floor(Math.random() * maxMargin) + safeBorderMargin;
     const randomMarginLeft = Math.floor(Math.random() * maxMargin) + safeBorderMargin;
 
@@ -74,22 +77,39 @@ function calculateFieldOfView(distance, length) {
 }
 
 
-function init() {
-    // Retrieve all grid items
-    gridContainer = document.getElementById('grid-container'); 
-    gridItems = gridContainer.children;
-    gridSquareSize = gridItems[0].getBoundingClientRect().width;
+//
+function mapScreenGridInfoPanel(){
+    viewportHeightTruePx=window.innerHeight * window.devicePixelRatio;
+    viewportWidthTruePx=window.innerWidth * window.devicePixelRatio;
+    
+    
+    let truePixelsMax;
+    
+    if (viewportHeightTruePx > viewportWidthTruePx){
+        truePixelsMax = viewportWidthTruePx;
+        console.log("height is higer, using witfdh");
+    }else{
+        truePixelsMax = viewportHeightTruePx;
+        console.log("height lower higer, using height");
+    }
+    truePixelsMax = Math.floor(truePixelsMax);
 
 
-    textCounterCorrectAnswers = document.getElementById('correctAnswers');
-    textCounterRounds = document.getElementById('rounds');
-    textScreenCharacteristics = document.getElementById('screenCharacteristics');  
 
+    console.log("pixelratio",window.devicePixelRatio);
+    console.log(truePixelsMax)
 
+    let gridPadding = Math.floor(0.04 * truePixelsMax);
+    let gridGap = Math.floor(0.01* truePixelsMax);
+    gridItemSize = Math.floor((truePixelsMax - gridPadding * 2 - gridGap * 2) / 3);
+    
+    gridContainer.style.gridTemplateRows = "repeat(3, " + gridItemSize +"px)";
+    gridContainer.style.gridTemplateColumns = "repeat(3, " + gridItemSize +"px)";
+    gridContainer.style.gap = ""+gridGap+"px";
+    gridContainer.style.padding = ""+gridPadding+"px";
+}
 
-
-
-    // Function to handle key presses
+function addKeyPressEvent(){
     document.addEventListener('keydown', function(event) {
         //console.log("event entered");
 
@@ -100,7 +120,6 @@ function init() {
             //console.log("valid 1-9 key");
 
             choice = parseInt(key)
-            useNumberPad = true;
             if(useNumberPad){
                 // Map numpad keys to grid positions
                 const numpadMap = {
@@ -114,22 +133,53 @@ function init() {
             userAnswer(choice);
         }
     });
+}
 
+const initFullscreen = async () => {
+    checkCookies(); // Ask the user his window's with and view distance, apply them to variables
+    document.documentElement.requestFullscreen(); 
+    await delay(1000); // Delay is required for elements to update before calling mapScreenGridInfoPanel()
+    setup();
+}
+
+function init(){
+    checkCookies(); // Ask the user his window's with and view distance, apply them to variables
+    setup();
+}
+
+
+function setup(){ 
+    /* // Manual override
+    sizeWindowWidthCm = 32.7;
+    distanceViewCm = 400 
+    */
+
+    // Retrieve all grid items
+    gridContainer = document.getElementById('grid-container'); 
+    gridItems = gridContainer.children;
+
+
+    textCounterCorrectAnswers = document.getElementById('correctAnswers');
+    textCounterRounds = document.getElementById('rounds');
+    textScreenCharacteristics = document.getElementById('screenCharacteristics');  
+    textTestingPPD = document.getElementById('testingPPD');  
+
+    mapScreenGridInfoPanel();
+
+    addKeyPressEvent();
+
+    let windowHorizontalFOV = calculateFieldOfView(distanceViewCm,sizeWindowWidthCm);
+    windowHorizontalFOV = Math.round((windowHorizontalFOV + Number.EPSILON) * 100) / 100;
+    let stringInfo = "<li>"+sizeWindowWidthCm +"cm</li><li>" + Math.round(viewportWidthTruePx) + " pixels</li><li>" + windowHorizontalFOV + "HFOV</li>";
+    textScreenCharacteristics.innerHTML = stringInfo;
 
     // Reset every values
     counterCorrectAnswer = 0;
     counterRounds = 0;
     ready = false;
 
-
-
-    checkCookies(); // Ask the user his window's with and view distance
-    /* // Manual override
-    sizeWindowWidth = 32.7; // Size in cm
-    distanceView = 400 // Distance in cm
-    */
-
-    sizeSquareToFindPixels = defaultSizeSquareToFindPixels;
+    // Size for first test
+    sizeSquareToFindPixels = gridItemSize /3;
 
     updateTestingPPD();
 
@@ -138,23 +188,15 @@ function init() {
     currentTestResultStruct = new TestResult(testingPPD, 0, 0, sizeSquareToFindPixels);
     arrayTests.push(currentTestResultStruct);
 
-    console.log('testingPPD is ' + testingPPD + ', sizeSquareToFindPixels is ' + sizeSquareToFindPixels + 'px');
-
     newTestDifficulty();
 }
 
 function updateTestingPPD(){
-    let windowHorizontalFOV = calculateFieldOfView(distanceView,sizeWindowWidth);
-    let lenghtOfSquareCm = (sizeWindowWidth / screen.width) * sizeSquareToFindPixels;
-    testingPPD = 1 / calculateFieldOfView(distanceView,lenghtOfSquareCm)
 
-    // rounding
-    testingPPD = Math.round((testingPPD + Number.EPSILON) * 100) / 100;
+    let lenghtOfSquareCm = (sizeWindowWidthCm / viewportWidthTruePx) * sizeSquareToFindPixels;
+    testingPPD = 1 / calculateFieldOfView(distanceViewCm,lenghtOfSquareCm)
 
-    windowHorizontalFOV = Math.round((windowHorizontalFOV + Number.EPSILON) * 100) / 100;
-
-    let stringInfo = "" + screen.width + ", Window horizontal FOV: " + windowHorizontalFOV + ", Testing PPD " + testingPPD;
-    textScreenCharacteristics.innerHTML = stringInfo;
+    textTestingPPD.innerHTML= Math.round((testingPPD + Number.EPSILON) * 100) / 100;
 }
 
 function newTestDifficulty(){
@@ -174,7 +216,7 @@ function newTestDifficulty(){
             // Change the pixel
             let newSize =  Math.round(sizeSquareToFindPixels * 0.7);
             
-            if(newSize >= sizeSquareToFindPixels){
+            if(newSize >= sizeSquareToFindPixels || newSize <= safeMinimalTestSizePx){
                 alert('Cant test further difficulty !')
             }else{
                 // We continue to next
@@ -196,9 +238,6 @@ function newTestDifficulty(){
     }else{
         newRound();
     }
-
-
-
 }
 
 
