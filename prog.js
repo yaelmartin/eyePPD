@@ -32,6 +32,7 @@ var viewportHeightTruePx;
 var divInfoPanel;
 var textCounterCorrectAnswers;
 var textCounterRounds;
+var textDistance;
 var textScreenCharacteristics;
 var textTestingPixel;
 var textTestingPPD;
@@ -95,15 +96,9 @@ function resizeTestGrid(){
     let ratioViewport = viewportWidthTruePx/viewportHeightTruePx; 
     if(ratioViewport < 1.4 && ratioViewport > 0.75){
         gridContainerSize= gridContainerSize * 0.8;
-        console.log("not enough space");
     }
 
     gridContainerSize = Math.floor(gridContainerSize);
-
-
-
-    console.log("pixelratio",window.devicePixelRatio);
-    console.log(gridContainerSize)
 
     let gridPadding = Math.floor(0.04 * gridContainerSize);
     let gridGap = Math.floor(0.01* gridContainerSize);
@@ -131,7 +126,6 @@ function resizeInfoPanel(){
         let remainingHeight = viewportHeightTruePx-gridContainerSize;
 
         let ratioSpaceLeft = viewportWidthTruePx/remainingHeight;
-        console.log(ratioSpaceLeft,infoPanelRatio);
         if(ratioSpaceLeft>infoPanelRatio){
             zoomScale = (remainingHeight)/(padding*2+height);
         }else{
@@ -151,7 +145,6 @@ function resizeInfoPanel(){
 
     zoomScale = Math.floor((zoomScale + Number.EPSILON) * 100) / 100;
 
-    console.log("zoomScale",zoomScale);
     divInfoPanel.style.zoom = zoomScale;
 }
 
@@ -202,6 +195,7 @@ function onPageLoaded(){
     divInfoPanel = document.getElementById('info-panel');
     textCounterCorrectAnswers = document.getElementById('correctAnswers');
     textCounterRounds = document.getElementById('rounds');
+    textDistance = document.getElementById('distance');  
     textScreenCharacteristics = document.getElementById('screenCharacteristics');
     textTestingPixel = document.getElementById('testingPixel');
     textTestingPPD = document.getElementById('testingPPD');  
@@ -228,6 +222,8 @@ function setup(){
     let stringInfo = "<li>"+sizeWindowWidthCm +"cm</li><li>" + Math.round(viewportWidthTruePx) + " pixels</li><li>" + windowHorizontalFOV + "HFOV</li>";
     textScreenCharacteristics.innerHTML = stringInfo;
 
+    textDistance.innerHTML=""+distanceViewCm+"cm";
+
     // Reset every values
     counterCorrectAnswer = 0;
     counterRounds = 0;
@@ -252,7 +248,7 @@ function updateTestingPPD(){
     testingPPD = 1 / calculateFieldOfView(distanceViewCm,lenghtOfSquareCm)
 
     textTestingPPD.innerHTML = Math.round((testingPPD + Number.EPSILON) * 100) / 100;
-    textTestingPixel.innerHTML = ""+sizeSquareToFindPixels + " pixels"; 
+    textTestingPixel.innerHTML = ""+sizeSquareToFindPixels + " pixels²"; 
 }
 
 function newTestDifficulty(){
@@ -270,10 +266,16 @@ function newTestDifficulty(){
         if(currentTestResultStruct.ratio() > requiredRatioToPassToNextDifficulty){
             
             // Change the pixel
-            let newSize =  Math.round(sizeSquareToFindPixels * 0.7);
+            let newSize;
+            if(sizeSquareToFindPixels >10){
+                newSize =  Math.round(sizeSquareToFindPixels * 0.7);
+            }else{
+                newSize =  Math.floor(sizeSquareToFindPixels * 0.9);
+            }
+
             
             if(newSize >= sizeSquareToFindPixels || newSize <= safeMinimalTestSizePx){
-                alert('Cant test further difficulty !')
+                alert('Cannot test further difficulty !\nRedo the test at a greater distance\nYou can see above ' + (Math.round((testingPPD + Number.EPSILON) * 100) / 100) + ' PPD')
             }else{
                 // We continue to next
                 sizeSquareToFindPixels = newSize;
@@ -288,7 +290,7 @@ function newTestDifficulty(){
 
             }
         }else{
-            alert('Score too low to go to the next test.');
+            alert('Score too low to go to the next test.\nnYou can see above ' + (Math.round((testingPPD + Number.EPSILON) * 100) / 100) + ' PPD') ;
         }
 
     }else{
@@ -312,14 +314,12 @@ const newRound = async () => {
     await delay(100);
 
     createRandomSquare();
-    console.log("correctSquare " + correctSquare);
     gridContainer.style.visibility = "visible" ;
     ready = true;
 }
 
 function userAnswer(intAnswer){
     if(ready){
-        console.log("user's answer is " + intAnswer);
 
         ready = false;
         if(intAnswer == correctSquare){

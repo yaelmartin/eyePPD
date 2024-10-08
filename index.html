@@ -27,30 +27,40 @@
     class="no-gap"
     style="display: inline-flex"
   >
-    <div class="container-fit no-gap centered">
-      <div id="info-panel" style="font-size: 15px">
-        <div>
-          Window width
+    <div class="container-fit centered">
+      <div id="info-panel" style="font-size: 17px">
+        <div class="row">
+          <div class="left-align">
+            Window width
 
-          <ul>
-            <span id="screenCharacteristics"></span>
-          </ul>
+            <ul>
+              <span id="screenCharacteristics"></span>
+            </ul>
+          </div>
+
+          <div class="right-align">
+            <div>Distance <span id="distance"></span></div>
+            <div>Square is <span id="testingPixel"></span></div>
+            <div>
+              Correct <span id="correctAnswers">0</span>/<span id="rounds"
+                >0</span
+              >
+            </div>
+          </div>
         </div>
-        <div>Testing <span id="testingPixel"></span></div>
+
         <div>
           Testing PPD <br /><span
             id="testingPPD"
-            style="font-size: 60px; line-height: 0.7"
+            style="font-size: 60px; line-height: 1"
           ></span>
         </div>
 
         <div>
-          Correct <span id="correctAnswers">0</span>/<span id="rounds">0</span>
+          <button onclick="clearCookie('distance')">Clear saved width</button>
+          <button onclick="init();">Init</button>
+          <button onclick="initFullscreen();">Init Fullscreen</button>
         </div>
-
-        <button onclick="clearCookie('distance')">Clear cookie</button>
-        <button onclick="init();">Init</button>
-        <button onclick="initFullscreen();">Init Fullscreen</button>
       </div>
 
       <div class="no-gap">
