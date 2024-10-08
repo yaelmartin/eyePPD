@@ -13,6 +13,7 @@ var sizeSquareToFindPixels;
 var testingPPD;
 
 var gridContainer;
+var gridContainerSize;
 var gridItems;
 var gridItemSize;
 
@@ -82,25 +83,31 @@ function calculateFieldOfView(distance, length) {
 function resizeTestGrid(){
     viewportHeightTruePx=window.innerHeight * window.devicePixelRatio;
     viewportWidthTruePx=window.innerWidth * window.devicePixelRatio;
-    
-    
-    let truePixelsMax;
+
     
     if (viewportHeightTruePx > viewportWidthTruePx){
-        truePixelsMax = viewportWidthTruePx;
+        gridContainerSize = viewportWidthTruePx;
     }else{
-        truePixelsMax = viewportHeightTruePx;
+        gridContainerSize = viewportHeightTruePx;
     }
-    truePixelsMax = Math.floor(truePixelsMax);
+
+    // Make sure there is enough space for the info panel
+    let ratioViewport = viewportWidthTruePx/viewportHeightTruePx; 
+    if(ratioViewport < 1.4 && ratioViewport > 0.75){
+        gridContainerSize= gridContainerSize * 0.8;
+        console.log("not enough space");
+    }
+
+    gridContainerSize = Math.floor(gridContainerSize);
 
 
 
     console.log("pixelratio",window.devicePixelRatio);
-    console.log(truePixelsMax)
+    console.log(gridContainerSize)
 
-    let gridPadding = Math.floor(0.04 * truePixelsMax);
-    let gridGap = Math.floor(0.01* truePixelsMax);
-    gridItemSize = Math.floor((truePixelsMax - gridPadding * 2 - gridGap * 2) / 3);
+    let gridPadding = Math.floor(0.04 * gridContainerSize);
+    let gridGap = Math.floor(0.01* gridContainerSize);
+    gridItemSize = Math.floor((gridContainerSize - gridPadding * 2 - gridGap * 2) / 3);
     
     gridContainer.style.gridTemplateRows = "repeat(3, " + gridItemSize +"px)";
     gridContainer.style.gridTemplateColumns = "repeat(3, " + gridItemSize +"px)";
@@ -121,9 +128,10 @@ function resizeInfoPanel(){
 
     let zoomScale;
     if (viewportHeightTruePx > viewportWidthTruePx){
-        let remainingHeight = viewportHeightTruePx-viewportWidthTruePx;
+        let remainingHeight = viewportHeightTruePx-gridContainerSize;
 
         let ratioSpaceLeft = viewportWidthTruePx/remainingHeight;
+        console.log(ratioSpaceLeft,infoPanelRatio);
         if(ratioSpaceLeft>infoPanelRatio){
             zoomScale = (remainingHeight)/(padding*2+height);
         }else{
@@ -131,17 +139,14 @@ function resizeInfoPanel(){
         }
 
     }else{
-        let remainingWitdh = viewportWidthTruePx-viewportHeightTruePx;
-        zoomScale = (remainingWitdh)/(padding*2+width);
+        let remainingWitdh = viewportWidthTruePx-gridContainerSize;
 
-        /*
-
-        let ratioSpaceLeft = viewportHeightTruePx/remainingWitdh;
+        let ratioSpaceLeft = remainingWitdh/viewportHeightTruePx;
         if(ratioSpaceLeft>infoPanelRatio){
-
-        }else{
             zoomScale = (viewportHeightTruePx)/(padding*2+height);
-        }*/
+        }else{
+            zoomScale = (remainingWitdh)/(padding*2+width);
+        }
     }
 
     zoomScale = Math.floor((zoomScale + Number.EPSILON) * 100) / 100;
@@ -214,6 +219,9 @@ function setup(){
     sizeWindowWidthCm = 32.7;
     distanceViewCm = 400 
     */
+
+    resizeTestGrid();
+    resizeInfoPanel();
 
     let windowHorizontalFOV = calculateFieldOfView(distanceViewCm,sizeWindowWidthCm);
     windowHorizontalFOV = Math.round((windowHorizontalFOV + Number.EPSILON) * 100) / 100;
@@ -333,5 +341,3 @@ function updateUIanswer(){
     textCounterCorrectAnswers.innerText = ""+counterCorrectAnswer;
     textCounterRounds.innerText = ""+counterRounds;
 }
-
-
