@@ -2,33 +2,38 @@
 
 ## **Introduction**
 
-Working with VR displays specifications isn't as easy as monitors and TV.
+eyePPD is a tool designed to quickly measure the maximum Pixels Per Degree (PPD) that your eyes can perceive in ideal conditions.
 
-Knowing the PPI (pixels per inch) of a HMD isn't enough to know how will it look in VR. A high PPI display could be spread accross a large field of view.
+## Why PPD matters
 
-Also headsets often have optics that fit more pixels in the center than the edges, prioritizing the most looked area.
+Working with VR display specifications isn't as easy as monitors and TV.
 
-A great unit to measure the potential max clarity of a heaset is its center PPD (pixels per degree).
+Knowing the PPI (pixels per inch) of a HMD isn't enough to know how it will it look in VR. A high PPI display could be spread across a large field of view.
 
-PPD makes it easy to compair clarity between HMDs of different field of view, different PPI, different pixels amount.
+Also, headsets often have optics that fit more pixels in the center than the edges, prioritizing the most looked-at area.
 
-PPD is slowly increasing with each generation of XR devices, but once we reach the acuity of the human eye, it will be pointless to increase it.
+A great unit to measure the potential maximum clarity of a headset is its center PPD (pixels per degree).
 
-With a quick internet search, you may stumble appon this value: 60PPD.
+It makes it easy to compare potential clarity between HMDs of different field of view, different PPI, different pixel amount.
 
-eyePPD is a tool that make it easy to the max PPD your eyes are able to see.
+PPD is slowly increasing with each generation of XR devices, and once we reach the acuity of the human eye, it will be pointless to increase it.
+
+With a quick internet search, you may stumble upon this value: 60PPD.\
+However this is actually far from the maximum the eye can perceive. Use this project to see for your own acuity!
 
 ## Prerequisites
 
-- Use a screen that is both high resolution and small. >2.5k screen laptops are great. <br> (Later, UI might get modified to work on phones and achieve even more precise results)
-
-- Make sure scalling is at 100% in your OS and with your browser. (Check with https://whatismyviewport.com/)
-
-- Make sure your screen is clean, something might be bigger than the test area or hide it.
+- Use a screen that is both high resolution and small. Smartphones are great.
+- Make sure your screen is clean; something might be bigger than the test area or hide it.
+- A way to interact with the device, such as a wireless keyboard with a numpad
+- A way to measure the width of your screen and viewing distance
 
 ## How to use the tool:
 
-- Open the tool's page in fullscreen
-- Measure in cm your screen width
+- Open the [tool's page](https://yaelmartin.github.io/eyePPD/)
+- Measure your screen width in cm
 - Measure your viewing distance (>3 meters allows for more accurate results)
-- With a wireless keyboard, select the square which contains the black square with your numpad 1-9 keys
+- Click the "Init Fullscreen" button and fill the fields
+- With your numpad 1-9 keys, select the square which contains the black square
+
+Note: I used centimeters, but any unit will work for the width/viewing distance as long as they are the same.
